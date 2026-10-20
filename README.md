@@ -17,7 +17,7 @@ La entrega se organiza en **10 días**, con una clase diaria de **3 horas** que 
 
 | Día | Contenido |
 |---|---|
-| 1 | Container application hosting |
+| 1 | Container application hosting: Azure Container Registry (ACR) Tasks y contenedores en Azure App Service ([guía de clase](classes/class-01-container-hosting/README.md)) |
 | 2 | Azure Container Apps |
 | 3 | Azure Kubernetes Service: arquitectura y despliegue |
 | 4 | Azure Kubernetes Service: operación, diagnóstico y práctica |
@@ -43,6 +43,7 @@ La entrega se organiza en **10 días**, con una clase diaria de **3 horas** que 
 ## Estructura
 
 - [modules/](modules/): objetivos, contenidos y vínculo Microsoft Learn de cada learning path.
+- [classes/](classes/): agenda, resumen y ejercicios organizados por clase.
 - [labs/](labs/): una guía práctica por cada uno de los nueve módulos.
 - [prerequisites/](prerequisites/): conocimientos, suscripción, cuentas y herramientas.
 - [docs/](docs/): preparación del entorno y recursos adicionales.
