@@ -35,10 +35,24 @@ def _resolve_exe(name: str) -> str:
     return resolved
 
 
+def _run_az(
+    argv: list[str], *, capture_output: bool = True
+) -> subprocess.CompletedProcess[str]:
+    """Run Azure CLI, routing Windows batch launchers through cmd.exe."""
+    argv = [_resolve_exe(argv[0]), *argv[1:]]
+    if os.name == "nt" and argv[0].lower().endswith((".cmd", ".bat")):
+        argv = [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", *argv]
+    return subprocess.run(
+        argv,
+        capture_output=capture_output,
+        text=True,
+        check=False,
+    )
+
+
 def run_quiet(description: str, argv: list[str]) -> bool:
     """Run a command, print an error on failure, return success as bool."""
-    argv = [_resolve_exe(argv[0]), *argv[1:]]
-    result = subprocess.run(argv, capture_output=True, text=True, check=False)
+    result = _run_az(argv)
     if result.returncode != 0:
         print(f"Error: {description} failed (exit code {result.returncode}).")
         combined = (result.stdout or "") + (result.stderr or "")
@@ -50,20 +64,41 @@ def run_quiet(description: str, argv: list[str]) -> bool:
 
 def az_query(argv: list[str]) -> str:
     """Run an `az ... -o tsv` probe and return stripped stdout (or empty)."""
-    argv = [_resolve_exe(argv[0]), *argv[1:]]
-    result = subprocess.run(argv, capture_output=True, text=True, check=False)
+    result = _run_az(argv)
     if result.returncode != 0:
         return ""
     return (result.stdout or "").strip()
 
 
 def require_az_login() -> str:
-    """Return the signed-in user's object id, or exit if not logged in."""
-    user_object_id = az_query(
+    """Log in when needed and return the signed-in user's object id."""
+    account = _run_az(
+        ["az", "account", "show", "--query", "user.name", "-o", "tsv"]
+    )
+    if account.returncode != 0 or not (account.stdout or "").strip():
+        print("No active Azure CLI session found. Starting 'az login'...")
+        login = _run_az(["az", "login"], capture_output=False)
+        if login.returncode != 0:
+            print(f"Error: 'az login' failed (exit code {login.returncode}).")
+            sys.exit(1)
+
+        account = _run_az(
+            ["az", "account", "show", "--query", "user.name", "-o", "tsv"]
+        )
+        if account.returncode != 0 or not (account.stdout or "").strip():
+            print("Error: 'az login' completed, but no active Azure account was found.")
+            if account.stderr and account.stderr.strip():
+                print(account.stderr.rstrip())
+            sys.exit(1)
+
+    identity = _run_az(
         ["az", "ad", "signed-in-user", "show", "--query", "id", "-o", "tsv"]
     )
-    if not user_object_id:
-        print("Error: Not authenticated with Azure. Please run: az login")
+    user_object_id = (identity.stdout or "").strip()
+    if identity.returncode != 0 or not user_object_id:
+        print("Error: Could not retrieve the signed-in user's Entra ID object ID.")
+        if identity.stderr and identity.stderr.strip():
+            print(identity.stderr.rstrip())
         sys.exit(1)
     return user_object_id
 
