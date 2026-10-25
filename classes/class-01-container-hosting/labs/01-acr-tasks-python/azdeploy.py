@@ -3,7 +3,7 @@
 # =============================================================================
 
 rg = "ai-200"  # Resource Group name
-location = "eastus"   # Azure region for the resources
+location = "centralus"   # Azure region for the resources
 
 # =============================================================================
 # DON'T CHANGE ANYTHING BELOW THIS LINE.

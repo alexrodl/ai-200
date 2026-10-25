@@ -1,0 +1,5 @@
+$env:RESOURCE_GROUP = "ai-200"
+$env:ACR_NAME = "acr3e5b0044"
+$env:APP_PLAN = "plan-docprocessor-3e5b0044"
+$env:APP_NAME = "app-docprocessor-3e5b0044"
+$env:LOCATION = "centralus"

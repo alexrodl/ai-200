@@ -1,3 +1,3 @@
 $env:RESOURCE_GROUP = "ai-200"
-$env:ACR_NAME = "acr0b96b79a"
+$env:ACR_NAME = "acr1ade8790"
 $env:LOCATION = "eastus"
