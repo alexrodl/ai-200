@@ -2,7 +2,7 @@
 # Change the values of these variables as needed.
 # =============================================================================
 
-rg = "ai-200"  # Resource Group name
+rg = "ai-200-06"  # Resource Group name
 location = "centralus"   # Azure region for the resources
 
 # =============================================================================
