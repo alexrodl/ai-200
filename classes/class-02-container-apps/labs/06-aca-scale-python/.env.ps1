@@ -1,0 +1,7 @@
+$env:RESOURCE_GROUP = "ai-200-05"
+$env:ACA_ENVIRONMENT = "aca-env-427cd1b8"
+$env:CONTAINER_APP_NAME = "agent-api-06"
+$env:CONTAINER_APP_FQDN = "agent-api-06.wonderfultree-28d7b461.centralus.azurecontainerapps.io"
+$env:CONTAINER_APP_URL = "https://agent-api-06.wonderfultree-28d7b461.centralus.azurecontainerapps.io"
+$env:CONTAINER_IMAGE = "agent-api-06:v1"
+$env:LOCATION = "centralus"

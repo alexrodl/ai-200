@@ -2,7 +2,7 @@
 # Change the values of these variables as needed.
 # =============================================================================
 
-rg = "ai-200-06"  # Resource Group name
+rg = "ai-200-05"  # Resource Group name
 location = "centralus"   # Azure region for the resources
 
 # =============================================================================
@@ -16,14 +16,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-CONTAINER_APP_NAME = "agent-api"
-CONTAINER_IMAGE = "agent-api:v1"
+CONTAINER_APP_NAME = "agent-api-06"
+CONTAINER_IMAGE = "agent-api-06:v1"
 TARGET_PORT = "8080"
 
 os.environ.setdefault("AZURE_CORE_ONLY_SHOW_ERRORS", "true")
 
 _EXE_CACHE: dict[str, str] = {}
-
 
 def _resolve_exe(name: str) -> str:
     cached = _EXE_CACHE.get(name)

@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 CONTAINER_APP_NAME = "ai-api"
-CONTAINER_IMAGE = "ai-api:v1"
+CONTAINER_IMAGE = "ai-api:v2"
 TARGET_PORT = "8000"
 MODEL_NAME = "gpt-5.4-mini"
 EMBEDDINGS_API_KEY = "demo-key-12345"
