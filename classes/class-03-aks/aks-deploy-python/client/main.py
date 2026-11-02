@@ -19,7 +19,9 @@ load_dotenv()
 
 # Get API endpoint from environment
 API_ENDPOINT = os.getenv("API_ENDPOINT", "http://localhost:8000")
-TIMEOUT = 30
+TIMEOUT = 120
+# gpt-5-mini spends part of this limit on reasoning before it writes any text
+MAX_TOKENS = 4000
 
 def clear_screen():
     """Clear the terminal screen (works on both Windows and Linux)."""
@@ -42,6 +44,20 @@ def initialize_client() -> httpx.AsyncClient:
         timeout=httpx.Timeout(TIMEOUT),
         headers={"Content-Type": "application/json"}
     )
+
+def describe_error(error: Exception) -> str:
+    """
+    Build a readable message, since some httpx errors have no text of their own.
+
+    Args:
+        error: The exception raised by the request
+
+    Returns:
+        str: Message to show to the user
+    """
+    if isinstance(error, httpx.TimeoutException):
+        return f"The API did not respond within {TIMEOUT} seconds ({type(error).__name__})"
+    return str(error) or type(error).__name__
 
 async def check_api_health() -> bool:
     """
@@ -145,7 +161,7 @@ async def send_streaming_inference_request(prompt: str):
     try:
         payload = {
             "inputs": {"prompt": prompt},
-            "parameters": {"temperature": 0.7, "max_tokens": 500}
+            "parameters": {"temperature": 0.7, "max_tokens": MAX_TOKENS}
         }
 
         async with initialize_client() as client:
@@ -185,10 +201,11 @@ async def send_streaming_inference_request(prompt: str):
                     else:
                         print("(no content received)")
                 else:
+                    await response.aread()
                     print(f"✗ Streaming request failed: {response.status_code}")
                     print(f"  Error: {response.text}")
     except Exception as e:
-        print(f"✗ Failed to send streaming request: {e}")
+        print(f"✗ Failed to send streaming request: {describe_error(e)}")
 
 async def start_chat_session():
     """
@@ -213,7 +230,7 @@ async def start_chat_session():
         try:
             payload = {
                 "inputs": {"prompt": prompt},
-                "parameters": {"temperature": 0.7, "max_tokens": 500}
+                "parameters": {"temperature": 0.7, "max_tokens": MAX_TOKENS}
             }
 
             async with initialize_client() as client:
@@ -221,6 +238,7 @@ async def start_chat_session():
                 async with client.stream("POST", "/v1/inference/stream", json=payload) as response:
                     if response.status_code == 200:
                         has_content = False
+                        has_error = False
                         async for line in response.aiter_lines():
                             line = line.strip()
                             if line.startswith("data: "):
@@ -232,6 +250,7 @@ async def start_chat_session():
                                         # Check for error
                                         if "error" in data:
                                             print(f"\n✗ Error: {data['error']}")
+                                            has_error = True
                                             break
 
                                         # Extract content from OpenAI format
@@ -250,11 +269,14 @@ async def start_chat_session():
 
                         if has_content:
                             print("\n")
+                        elif not has_error:
+                            print("\n✗ The API returned no content")
                     else:
+                        await response.aread()
                         print(f"\n✗ Request failed: {response.status_code}")
                         print(f"  Error: {response.text}")
         except Exception as e:
-            print(f"\n✗ Chat error: {e}")
+            print(f"\n✗ Chat error: {describe_error(e)}")
 
     pause_and_continue()
 

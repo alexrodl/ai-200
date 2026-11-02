@@ -20,8 +20,8 @@ La entrega se organiza en **10 días**, con una clase diaria de **3 horas** que 
 | 1 | Container application hosting: Azure Container Registry (ACR) Tasks y contenedores en Azure App Service ([guía de clase](classes/class-01-container-hosting/README.md)) |
 | 2 | Azure Container Apps |
 | 3 | Azure Kubernetes Service: arquitectura y despliegue |
-| 4 | Azure Kubernetes Service: operación, diagnóstico y práctica |
-| 5 | Azure Cosmos DB for NoSQL |
+| 4 | Azure Kubernetes Service: configuración, diagnóstico y práctica; introducción a Azure Cosmos DB ([guía de clase](classes/class-04-aks-cosmos-db/README.md)) |
+| 5 | Azure Cosmos DB for NoSQL: consultas, búsqueda vectorial e índices ([guía de clase](classes/class-05-cosmos-db/README.md)) |
 | 6 | Azure Database for PostgreSQL |
 | 7 | Azure Managed Redis |
 | 8 | Backend services for AI |

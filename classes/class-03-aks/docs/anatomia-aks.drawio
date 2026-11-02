@@ -1,0 +1,107 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram id="anatomia-aks" name="Anatomía de AKS">
+    <mxGraphModel dx="1200" dy="810" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="810" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cluster" value="&lt;b style=&quot;font-size:15px&quot;&gt;CLÚSTER AKS&lt;/b&gt;&amp;nbsp;&amp;nbsp;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;aks-d6ca3672&lt;/font&gt;" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=2;fillColor=none;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1160" height="665" as="geometry" />
+        </mxCell>
+        <mxCell id="control-plane" value="&lt;b style=&quot;font-size:14px&quot;&gt;CONTROL PLANE&lt;/b&gt;&amp;nbsp;&amp;nbsp;lo administra Azure&lt;br&gt;API server · etcd · scheduler · controllers" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=8;fillColor=#1c2333;fillOpacity=7;" vertex="1" parent="1">
+          <mxGeometry x="45" y="60" width="1110" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="control-plane-note" value="guarda el estado deseado y decide en qué nodo va cada pod" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;text;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=0;align=right;" vertex="1" parent="1">
+          <mxGeometry x="760" y="84" width="375" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="namespace" value="&lt;b style=&quot;font-size:15px&quot;&gt;NAMESPACE&lt;/b&gt;&amp;nbsp;&amp;nbsp;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;default&lt;/font&gt;&lt;br&gt;organización lógica: nombres, permisos, cuotas" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=2;fillColor=#3b82f6;fillOpacity=11;strokeColor=#3b82f6;strokeWidth=2;dashed=1;dashPattern=7 5;spacingLeft=20;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="146" width="720" height="519" as="geometry" />
+        </mxCell>
+        <mxCell id="node-pool" value="" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=2;fillColor=#e08a2e;fillOpacity=11;strokeColor=#e08a2e;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="490" y="146" width="665" height="519" as="geometry" />
+        </mxCell>
+        <mxCell id="node-vm" value="" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=2;fillColor=#e08a2e;fillOpacity=8;strokeColor=#e08a2e;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="505" y="186" width="635" height="464" as="geometry" />
+        </mxCell>
+        <mxCell id="node-pool-label" value="&lt;b style=&quot;font-size:15px&quot;&gt;NODE POOL&lt;/b&gt;&amp;nbsp;&amp;nbsp;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;nodepool1&lt;/font&gt;&amp;nbsp;&amp;nbsp;VMs iguales" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;text;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="785" y="158" width="350" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="node-vm-label" value="&lt;b style=&quot;font-size:15px&quot;&gt;NODO (VM)&lt;/b&gt;&amp;nbsp;&amp;nbsp;aporta CPU, memoria y red&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:12px&quot;&gt;aks-nodepool1-67991982-vmss000000&lt;/font&gt;" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;text;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="785" y="198" width="340" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="overlap-note" value="&lt;b&gt;Aquí se cruzan:&lt;/b&gt;&lt;br&gt;el pod pertenece a un namespace&lt;br&gt;y corre en un nodo" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;text;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="515" y="212" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="deployment" value="&lt;b style=&quot;font-size:14px&quot;&gt;DEPLOYMENT&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;aks-api&lt;/font&gt;&lt;br&gt;estado deseado y actualizaciones" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=6;" vertex="1" parent="1">
+          <mxGeometry x="75" y="225" width="290" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="replicaset" value="&lt;b style=&quot;font-size:14px&quot;&gt;REPLICASET&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;aks-api-6c745dfb94&lt;/font&gt;&lt;br&gt;mantiene N pods vivos (aquí N = 1)" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=6;" vertex="1" parent="1">
+          <mxGeometry x="75" y="375" width="290" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="service" value="&lt;b style=&quot;font-size:14px&quot;&gt;SERVICE&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;aks-api-service&lt;/font&gt;&lt;br&gt;IP y nombre estables; reparte tráfico" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=6;" vertex="1" parent="1">
+          <mxGeometry x="75" y="560" width="290" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pod" value="&lt;b style=&quot;font-size:16px&quot;&gt;POD&lt;/b&gt;&amp;nbsp;&amp;nbsp;la unidad mínima&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:12px&quot;&gt;aks-api-6c745dfb94-zh7tw&lt;/font&gt;&lt;br&gt;IP propia, compartida por&lt;br&gt;sus contenedores" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;arcSize=4;fillColor=#ffffff;fillOpacity=35;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="525" y="290" width="220" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="container" value="&lt;b style=&quot;font-size:14px&quot;&gt;CONTENEDOR&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:13px&quot;&gt;api&lt;/font&gt;&lt;br&gt;tu código, puerto 8000&lt;br&gt;imagen:&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:12px&quot;&gt;aks-api:latest&lt;/font&gt;" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=7;" vertex="1" parent="pod">
+          <mxGeometry x="15" y="102" width="190" height="122" as="geometry" />
+        </mxCell>
+        <mxCell id="kubelet" value="&lt;b style=&quot;font-size:14px&quot;&gt;KUBELET + CONTAINERD&lt;/b&gt;&lt;br&gt;agente y runtime de cada nodo:&lt;br&gt;ejecutan lo que pide el control plane" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="290" width="245" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="other-pod" value="&lt;b style=&quot;font-size:14px&quot;&gt;OTRO POD&lt;/b&gt;&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:12px&quot;&gt;coredns-76df789c68-4lvrl&lt;/font&gt;&lt;br&gt;mismo nodo, otro namespace:&lt;br&gt;&lt;font face=&quot;Consolas&quot; style=&quot;font-size:12px&quot;&gt;kube-system&lt;/font&gt;" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=none;dashed=1;dashPattern=4 3;" vertex="1" parent="1">
+          <mxGeometry x="870" y="430" width="245" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="load-balancer" value="&lt;b style=&quot;font-size:14px&quot;&gt;AZURE LOAD BALANCER&lt;/b&gt;&lt;br&gt;IP pública, fuera del clúster" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=#1c2333;fillOpacity=6;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="75" y="715" width="290" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="internet" value="&lt;b style=&quot;font-size:14px&quot;&gt;INTERNET&lt;/b&gt;" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;rounded=1;arcSize=7;align=left;verticalAlign=top;spacingLeft=12;spacingTop=4;strokeColor=#1c2333;fillColor=none;align=center;verticalAlign=middle;spacingLeft=0;spacingTop=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="715" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="reading-order" value="&lt;b style=&quot;color:#2f6fd6&quot;&gt;Lógico&lt;/b&gt;&amp;nbsp;&amp;nbsp;Clúster › Namespace › Deployment › ReplicaSet › Pod › Contenedor&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:#c2701a&quot;&gt;Físico&lt;/b&gt;&amp;nbsp;&amp;nbsp;Clúster › Node pool › Nodo › Pod › Contenedor" style="html=1;whiteSpace=wrap;fontFamily=Segoe UI;fontSize=13;fontColor=#1c2333;text;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="700" y="722" width="480" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e-deploy-rs" value="crea uno por versión" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;align=left;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="deployment" target="replicaset">
+          <mxGeometry x="0" relative="1" as="geometry">
+            <mxPoint x="10" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-rs-pod" value="crea y repone" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5208333333333334;entryDx=0;entryDy=0;" edge="1" parent="1" source="replicaset" target="pod">
+          <mxGeometry x="-0.22" relative="1" as="geometry">
+            <mxPoint x="0" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-svc-pod" value="envía tráfico&lt;br&gt;por etiqueta" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="service" target="pod">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <mxPoint x="0" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-cp-kubelet" value="indica qué pods ejecutar" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;align=right;exitX=0.9369369369369369;exitY=1;exitDx=0;exitDy=0;entryX=0.8775510204081632;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="control-plane" target="kubelet">
+          <mxGeometry x="0.72" relative="1" as="geometry">
+            <mxPoint x="-8" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-kubelet-pod" value="arranca y vigila" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.16666666666666666;entryDx=0;entryDy=0;" edge="1" parent="1" source="kubelet" target="pod">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint x="0" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-kubelet-other" value="arranca y vigila" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;align=left;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="kubelet" target="other-pod">
+          <mxGeometry x="0" relative="1" as="geometry">
+            <mxPoint x="10" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-lb-svc" value="puerto 80 → pod 8000" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;align=left;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="load-balancer" target="service">
+          <mxGeometry x="-0.55" relative="1" as="geometry">
+            <mxPoint x="10" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-internet-lb" value="HTTP" style="html=1;rounded=0;endArrow=block;endFill=1;strokeColor=#1c2333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1c2333;labelBackgroundColor=none;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="internet" target="load-balancer">
+          <mxGeometry x="0" relative="1" as="geometry">
+            <mxPoint x="0" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 810" width="1200" height="810" color="#1c2333" font-family="'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif" font-size="13" role="img" aria-label="Clúster AKS con un namespace (organización lógica) y un nodo (máquina física) que se cruzan en el pod: el Deployment crea el ReplicaSet, este crea el pod, el Service le envía tráfico y el kubelet del nodo lo ejecuta. El contenedor corre dentro del pod.">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <rect id="bg" x="0" y="0" width="1200" height="810" fill="#ffffff"/>
+
+  <!-- Cluster -->
+  <rect x="20" y="20" width="1160" height="665" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="45" y="48" fill="currentColor" font-size="15" font-weight="700">CLÚSTER AKS</text>
+  <text x="150" y="48" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="13">aks-d6ca3672</text>
+
+  <!-- Control plane -->
+  <rect x="45" y="60" width="1110" height="66" rx="6" fill="currentColor" fill-opacity="0.07" stroke="currentColor"/>
+  <text x="65" y="86" fill="currentColor" font-size="14" font-weight="700">CONTROL PLANE</text>
+  <text x="185" y="86" fill="currentColor">lo administra Azure</text>
+  <text x="65" y="108" fill="currentColor">API server · etcd · scheduler · controllers</text>
+  <text x="1135" y="98" fill="currentColor" text-anchor="end">guarda el estado deseado y decide en qué nodo va cada pod</text>
+
+  <!-- Regions: logical and physical -->
+  <rect x="45" y="146" width="720" height="519" rx="8" fill="#3b82f6" fill-opacity="0.11" stroke="#3b82f6" stroke-width="2" stroke-dasharray="7 5"/>
+  <rect x="490" y="146" width="665" height="519" rx="8" fill="#e08a2e" fill-opacity="0.11" stroke="#e08a2e" stroke-width="2"/>
+  <rect x="505" y="186" width="635" height="464" rx="6" fill="#e08a2e" fill-opacity="0.08" stroke="#e08a2e" stroke-width="1.5"/>
+
+  <!-- Region labels -->
+  <text x="65" y="172" fill="currentColor" font-size="15" font-weight="700">NAMESPACE</text>
+  <text x="165" y="172" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">default</text>
+  <text x="65" y="192" fill="currentColor">organización lógica: nombres, permisos, cuotas</text>
+  <text x="785" y="172" fill="currentColor" font-size="15" font-weight="700">NODE POOL</text>
+  <text x="880" y="172" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">nodepool1</text>
+  <text x="965" y="172" fill="currentColor">VMs iguales</text>
+  <text x="785" y="212" fill="currentColor" font-size="15" font-weight="700">NODO (VM)</text>
+  <text x="880" y="212" fill="currentColor">aporta CPU, memoria y red</text>
+  <text x="785" y="232" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="12">aks-nodepool1-67991982-vmss000000</text>
+
+  <!-- Overlap callout -->
+  <text x="635" y="225" fill="currentColor" text-anchor="middle" font-weight="700">Aquí se cruzan:</text>
+  <text x="635" y="245" fill="currentColor" text-anchor="middle">el pod pertenece a un namespace</text>
+  <text x="635" y="265" fill="currentColor" text-anchor="middle">y corre en un nodo</text>
+
+  <!-- Deployment -->
+  <rect x="75" y="225" width="290" height="80" rx="6" fill="currentColor" fill-opacity="0.05" stroke="currentColor"/>
+  <text x="90" y="249" fill="currentColor" font-size="14" font-weight="700">DEPLOYMENT</text>
+  <text x="90" y="269" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">aks-api</text>
+  <text x="90" y="290" fill="currentColor">estado deseado y actualizaciones</text>
+
+  <line x1="220" y1="305" x2="220" y2="373" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="230" y="344" fill="currentColor" font-size="12.5">crea uno por versión</text>
+
+  <!-- ReplicaSet -->
+  <rect x="75" y="375" width="290" height="80" rx="6" fill="currentColor" fill-opacity="0.05" stroke="currentColor"/>
+  <text x="90" y="399" fill="currentColor" font-size="14" font-weight="700">REPLICASET</text>
+  <text x="90" y="419" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">aks-api-6c745dfb94</text>
+  <text x="90" y="440" fill="currentColor">mantiene N pods vivos (aquí N = 1)</text>
+
+  <line x1="365" y1="415" x2="523" y2="415" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="427" y="406" fill="currentColor" font-size="12.5" text-anchor="middle">crea y repone</text>
+
+  <!-- Service -->
+  <rect x="75" y="560" width="290" height="80" rx="6" fill="currentColor" fill-opacity="0.05" stroke="currentColor"/>
+  <text x="90" y="584" fill="currentColor" font-size="14" font-weight="700">SERVICE</text>
+  <text x="90" y="604" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">aks-api-service</text>
+  <text x="90" y="625" fill="currentColor">IP y nombre estables; reparte tráfico</text>
+
+  <path d="M365 600 H635 V532" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="427" y="591" fill="currentColor" font-size="12.5" text-anchor="middle">envía tráfico</text>
+  <text x="427" y="618" fill="currentColor" font-size="12.5" text-anchor="middle">por etiqueta</text>
+
+  <!-- Pod: the point where both views meet -->
+  <rect x="525" y="290" width="220" height="240" rx="8" fill="#ffffff" fill-opacity="0.35" stroke="currentColor" stroke-width="3"/>
+  <text x="540" y="316" fill="currentColor" font-size="16" font-weight="700">POD</text>
+  <text x="582" y="316" fill="currentColor">la unidad mínima</text>
+  <text x="540" y="338" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="12">aks-api-6c745dfb94-zh7tw</text>
+  <text x="540" y="358" fill="currentColor">IP propia, compartida por</text>
+  <text x="540" y="376" fill="currentColor">sus contenedores</text>
+
+  <!-- Container -->
+  <rect x="540" y="392" width="190" height="122" rx="5" fill="currentColor" fill-opacity="0.07" stroke="currentColor"/>
+  <text x="552" y="415" fill="currentColor" font-size="14" font-weight="700">CONTENEDOR</text>
+  <text x="552" y="436" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace">api</text>
+  <text x="552" y="457" fill="currentColor">tu código, puerto 8000</text>
+  <text x="552" y="478" fill="currentColor">imagen:</text>
+  <text x="552" y="497" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="12">aks-api:latest</text>
+
+  <!-- Kubelet -->
+  <rect x="870" y="290" width="245" height="80" rx="6" fill="currentColor" fill-opacity="0.05" stroke="currentColor"/>
+  <text x="885" y="314" fill="currentColor" font-size="14" font-weight="700">KUBELET + CONTAINERD</text>
+  <text x="885" y="335" fill="currentColor">agente y runtime de cada nodo:</text>
+  <text x="885" y="354" fill="currentColor">ejecutan lo que pide el control plane</text>
+
+  <line x1="1085" y1="126" x2="1085" y2="288" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1077" y="274" fill="currentColor" font-size="12.5" text-anchor="end">indica qué pods ejecutar</text>
+
+  <line x1="870" y1="330" x2="748" y2="330" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="772" y="321" fill="currentColor" font-size="12.5">arranca y vigila</text>
+
+  <line x1="992" y1="370" x2="992" y2="428" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1002" y="404" fill="currentColor" font-size="12.5">arranca y vigila</text>
+
+  <!-- Pod from another namespace -->
+  <rect x="870" y="430" width="245" height="100" rx="6" fill="none" stroke="currentColor" stroke-dasharray="4 3"/>
+  <text x="885" y="454" fill="currentColor" font-size="14" font-weight="700">OTRO POD</text>
+  <text x="885" y="474" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="12">coredns-76df789c68-4lvrl</text>
+  <text x="885" y="494" fill="currentColor">mismo nodo, otro namespace:</text>
+  <text x="885" y="513" fill="currentColor" font-family="'Cascadia Mono', Consolas, Menlo, monospace" font-size="12">kube-system</text>
+
+  <!-- Outside the cluster -->
+  <rect x="75" y="715" width="290" height="70" rx="6" fill="currentColor" fill-opacity="0.05" stroke="currentColor"/>
+  <text x="90" y="741" fill="currentColor" font-size="14" font-weight="700">AZURE LOAD BALANCER</text>
+  <text x="90" y="763" fill="currentColor">IP pública, fuera del clúster</text>
+
+  <line x1="220" y1="715" x2="220" y2="642" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="230" y="704" fill="currentColor" font-size="12.5">puerto 80 → pod 8000</text>
+
+  <rect x="500" y="715" width="170" height="70" rx="6" fill="none" stroke="currentColor"/>
+  <text x="585" y="755" fill="currentColor" font-size="14" font-weight="700" text-anchor="middle">INTERNET</text>
+
+  <line x1="500" y1="750" x2="367" y2="750" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="433" y="741" fill="currentColor" font-size="12.5" text-anchor="middle">HTTP</text>
+
+  <!-- Reading order -->
+  <text x="700" y="735" fill="#2f6fd6" font-weight="700">Lógico</text>
+  <text x="750" y="735" fill="currentColor">Clúster › Namespace › Deployment › ReplicaSet › Pod › Contenedor</text>
+  <text x="700" y="763" fill="#c2701a" font-weight="700">Físico</text>
+  <text x="750" y="763" fill="currentColor">Clúster › Node pool › Nodo › Pod › Contenedor</text>
+</svg>

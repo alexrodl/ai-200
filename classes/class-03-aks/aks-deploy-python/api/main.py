@@ -12,6 +12,7 @@ Endpoints:
 
 import os
 import json
+import asyncio
 import logging
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
@@ -185,7 +186,9 @@ async def streaming_inference(request: Request):
 
     parameters = body.get("parameters", {})
 
-    async def event_generator():
+    # Regular generator: Starlette runs it in a worker thread, so the blocking
+    # SDK calls do not stop health probes or other requests
+    def event_generator():
         try:
             client = get_openai_client()
             response = client.chat.completions.create(
@@ -194,14 +197,26 @@ async def streaming_inference(request: Request):
                 max_completion_tokens=parameters.get("max_tokens", 16384),
                 stream=True,
             )
+            finish_reason = None
             for chunk in response:
-                if chunk.choices and chunk.choices[0].delta.content:
+                if not chunk.choices:
+                    continue
+                finish_reason = chunk.choices[0].finish_reason or finish_reason
+                if chunk.choices[0].delta.content:
                     data = {
                         "choices": [{
                             "delta": {"content": chunk.choices[0].delta.content}
                         }]
                     }
                     yield f"data: {json.dumps(data)}\n\n"
+            if finish_reason == "length":
+                message = "The model reached the max_tokens limit. Increase max_tokens or shorten the prompt."
+                logger.warning(f"Streaming inference stopped: {message}")
+                yield f"data: {json.dumps({'error': message})}\n\n"
+            elif finish_reason not in (None, "stop"):
+                message = f"The model stopped early (finish_reason={finish_reason})"
+                logger.warning(f"Streaming inference stopped: {message}")
+                yield f"data: {json.dumps({'error': message})}\n\n"
             yield "data: [DONE]\n\n"
         except Exception as e:
             logger.error(f"Streaming inference failed: {e}")
@@ -233,7 +248,9 @@ async def call_foundry_inference(
 
     try:
         client = get_openai_client()
-        response = client.chat.completions.create(
+        # Blocking SDK call: run it in a thread to keep the event loop free
+        response = await asyncio.to_thread(
+            client.chat.completions.create,
             model=FOUNDRY_DEPLOYMENT,
             messages=[{"role": "user", "content": prompt}],
             max_completion_tokens=parameters.get("max_tokens", 16384),
