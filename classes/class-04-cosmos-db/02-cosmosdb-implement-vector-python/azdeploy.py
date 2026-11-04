@@ -2,7 +2,7 @@
 # Change the values of these variables as needed.
 # =============================================================================
 
-rg = "ai-200"  # Resource Group name
+rg = "ai-200-02"  # Resource Group name
 location = "eastus2"   # Azure region for the resources
 
 # =============================================================================
@@ -17,8 +17,19 @@ import sys
 import time
 from pathlib import Path
 
-DATABASE_NAME = "ragstore"
-CONTAINER_NAME = "chunks"
+DATABASE_NAME = "vectorstore"
+CONTAINER_NAME = "vectors"
+
+VECTOR_INDEXING_POLICY = (
+    '{"indexingMode":"consistent","automatic":true,'
+    '"includedPaths":[{"path":"/*"}],'
+    '"excludedPaths":[{"path":"/embedding/*"}],'
+    '"vectorIndexes":[{"path":"/embedding","type":"diskANN"}]}'
+)
+VECTOR_EMBEDDING_POLICY = (
+    '{"vectorEmbeddings":[{"path":"/embedding","dataType":"float32",'
+    '"distanceFunction":"cosine","dimensions":256}]}'
+)
 
 os.environ.setdefault("AZURE_CORE_ONLY_SHOW_ERRORS", "true")
 
@@ -126,7 +137,7 @@ def require_az_login() -> str:
 
 def _derived_names(user_object_id: str) -> str:
     user_hash = hashlib.sha1(user_object_id.encode("utf-8")).hexdigest()[:8]
-    return f"cosmos-rag-{user_hash}"
+    return f"cosmos-vector-{user_hash}"
 
 
 def create_resource_group() -> bool:
@@ -189,7 +200,7 @@ def _create_cosmosdb_account_resource(account_name: str) -> bool:
         "--resource-group", rg,
         "--name", account_name,
         "--locations", f"regionName={location}",
-        "--capabilities", "EnableServerless",
+        "--capabilities", "EnableServerless", "EnableNoSQLVectorSearch",
         "--default-consistency-level", "Session",
     ]
     waited = 0
@@ -213,7 +224,7 @@ def _create_cosmosdb_account_resource(account_name: str) -> bool:
             print(f"lack of capacity in the '{location}' region.")
             print()
             print("To resolve this:")
-            print("  1. Choose option 5 to exit the script.")
+            print("  1. Exit the script.")
             print("  2. Near the top of this script, change the 'location' variable")
             print("     to a different Azure region.")
             print("  3. Run the script again and choose option 1. The failed account")
@@ -279,7 +290,7 @@ def create_cosmosdb_account(account_name: str) -> bool:
         print("This may take several minutes...")
         if not _create_cosmosdb_account_resource(account_name):
             return False
-        print("Cosmos DB account created successfully")
+        print("Cosmos DB account created with vector search capability")
 
     print(f"Creating database '{DATABASE_NAME}'...")
     db_exists = az_query(
@@ -302,7 +313,27 @@ def create_cosmosdb_account(account_name: str) -> bool:
             return False
         print(f"Database created: {DATABASE_NAME}")
 
-    print(f"Creating container '{CONTAINER_NAME}'...")
+    print()
+    print("Use option 2 to create the container.")
+    return True
+
+
+def create_container(account_name: str) -> bool:
+    print("Creating container with vector search policies...")
+
+    status = az_query(
+        ["az", "cosmosdb", "show", "--resource-group", rg, "--name", account_name,
+         "--query", "provisioningState", "-o", "tsv"]
+    )
+    if not status:
+        print(f"Error: Cosmos DB account '{account_name}' not found.")
+        print("Please run option 1 to create the Cosmos DB account, then try again.")
+        return False
+    if status != "Succeeded":
+        print(f"Error: Cosmos DB account is not ready (current state: {status}).")
+        print("Please wait for deployment to complete. Use option 4 to check status.")
+        return False
+
     container_exists = az_query(
         ["az", "cosmosdb", "sql", "container", "show",
          "--resource-group", rg, "--account-name", account_name,
@@ -311,23 +342,36 @@ def create_cosmosdb_account(account_name: str) -> bool:
     )
     if container_exists:
         print(f"Container already exists: {CONTAINER_NAME}")
-    else:
-        if not run_quiet(
-            "Create container",
-            [
-                "az", "cosmosdb", "sql", "container", "create",
-                "--resource-group", rg,
-                "--account-name", account_name,
-                "--database-name", DATABASE_NAME,
-                "--name", CONTAINER_NAME,
-                "--partition-key-path", "/documentId",
-            ],
-        ):
-            return False
-        print(f"Container created: {CONTAINER_NAME} (partition key: /documentId)")
+        return True
 
+    if not run_quiet(
+        "Create container",
+        [
+            "az", "cosmosdb", "sql", "container", "create",
+            "--resource-group", rg,
+            "--account-name", account_name,
+            "--database-name", DATABASE_NAME,
+            "--name", CONTAINER_NAME,
+            "--partition-key-path", "/documentId",
+            "--idx", VECTOR_INDEXING_POLICY,
+            "--vector-embeddings", VECTOR_EMBEDDING_POLICY,
+        ],
+    ):
+        return False
+
+    print(f"Container created: {CONTAINER_NAME}")
     print()
-    print("Use option 2 to configure Entra ID access.")
+    print("  Vector embedding policy:")
+    print("    - Path: /embedding")
+    print("    - Data type: float32")
+    print("    - Distance function: cosine")
+    print("    - Dimensions: 256")
+    print()
+    print("  Indexing policy:")
+    print("    - Vector index type: diskANN")
+    print("    - Embedding path excluded from standard indexing")
+    print()
+    print("Use option 3 to configure Entra ID access.")
     return True
 
 
@@ -344,7 +388,7 @@ def configure_entra_access(account_name: str, user_object_id: str) -> bool:
         return False
     if status != "Succeeded":
         print(f"Error: Cosmos DB account is not ready (current state: {status}).")
-        print("Please wait for deployment to complete. Use option 3 to check status.")
+        print("Please wait for deployment to complete. Use option 4 to check status.")
         return False
 
     user_upn = az_query(
@@ -436,6 +480,15 @@ def check_deployment_status(account_name: str, user_object_id: str) -> bool:
 
     print("  Cosmos DB account is ready")
 
+    capabilities = az_query(
+        ["az", "cosmosdb", "show", "--resource-group", rg, "--name", account_name,
+         "--query", "capabilities[].name", "-o", "tsv"]
+    )
+    if "EnableNoSQLVectorSearch" in (capabilities or "").split():
+        print("  Vector search capability enabled")
+    else:
+        print("  WARNING: Vector search capability not enabled")
+
     db = az_query(
         ["az", "cosmosdb", "sql", "database", "show",
          "--resource-group", rg, "--account-name", account_name,
@@ -502,7 +555,7 @@ def retrieve_connection_info(account_name: str, user_object_id: str) -> bool:
     )
     if not cosmos_role:
         print("Error: Entra ID access not configured for this account.")
-        print("Please run option 2 to configure Entra ID access, then try again.")
+        print("Please run option 3 to configure Entra ID access, then try again.")
         return False
 
     endpoint = az_query(
@@ -533,17 +586,18 @@ def retrieve_connection_info(account_name: str, user_object_id: str) -> bool:
 def show_menu(account_name: str) -> None:
     clear_screen()
     print("=====================================================================")
-    print("    Azure Cosmos DB for NoSQL Deployment Menu")
+    print("    Azure Cosmos DB Vector Search Deployment Menu")
     print("=====================================================================")
     print(f"Resource Group: {rg}")
     print(f"Account Name: {account_name}")
     print(f"Location: {location}")
     print("=====================================================================")
-    print("1. Create Cosmos DB account")
-    print("2. Configure Entra ID access")
-    print("3. Check deployment status")
-    print("4. Retrieve connection info")
-    print("5. Exit")
+    print("1. Create Cosmos DB account (with vector search capability)")
+    print("2. Create container (with vector indexing policies)")
+    print("3. Configure Entra ID access")
+    print("4. Check deployment status")
+    print("5. Retrieve connection info")
+    print("6. Exit")
     print("=====================================================================")
 
 
@@ -565,8 +619,8 @@ def main() -> None:
 
     while True:
         show_menu(account_name)
-        choice = input("Please select an option (1-5): ").strip()
-        if choice in {"1", "2", "3", "4", "5"}:
+        choice = input("Please select an option (1-6): ").strip()
+        if choice in {"1", "2", "3", "4", "5", "6"}:
             clear_screen()
 
         if choice == "1":
@@ -576,26 +630,31 @@ def main() -> None:
             pause()
         elif choice == "2":
             print()
-            configure_entra_access(account_name, user_object_id)
+            create_container(account_name)
             print()
             pause()
         elif choice == "3":
             print()
-            check_deployment_status(account_name, user_object_id)
+            configure_entra_access(account_name, user_object_id)
             print()
             pause()
         elif choice == "4":
             print()
-            retrieve_connection_info(account_name, user_object_id)
+            check_deployment_status(account_name, user_object_id)
             print()
             pause()
         elif choice == "5":
+            print()
+            retrieve_connection_info(account_name, user_object_id)
+            print()
+            pause()
+        elif choice == "6":
             print("Exiting...")
             clear_screen()
             sys.exit(0)
         else:
             print()
-            print("Invalid option. Please select 1-5.")
+            print("Invalid option. Please select 1-6.")
             print()
             pause()
 

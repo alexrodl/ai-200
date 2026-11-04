@@ -2,11 +2,11 @@
 # Change the values of these variables as needed.
 # =============================================================================
 
-rg = "ai-200-07"  # Resource Group name
+rg = "ai-200-aks"  # Resource Group name
 location = "eastus2"   # Azure region for the resources
 
 # If the Standard_D2s_v7 SKU is not available in your region, try using Standard_D2s_v5, or Standard_D2s_v6 instead.
-AKS_VM_SIZE = "Standard_D2s_v7"
+AKS_VM_SIZE = "Standard_D2s_v5"
 
 # =============================================================================
 # DON'T CHANGE ANYTHING BELOW THIS LINE.
@@ -127,7 +127,7 @@ def write_env_files(env_vars: dict[str, str], directory: str = ".") -> None:
 def _derived_names(user_object_id: str) -> tuple[str, str, str]:
     user_hash = hashlib.sha1(user_object_id.encode("utf-8")).hexdigest()[:8]
     return (
-        f"foundry-resource-{user_hash}",
+        f"foundry-resource-2-{user_hash}",
         f"acr{user_hash}",
         f"aks-{user_hash}",
     )

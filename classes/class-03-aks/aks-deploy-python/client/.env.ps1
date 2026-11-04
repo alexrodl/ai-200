@@ -1,1 +1,1 @@
-$env:API_ENDPOINT = "http://57.166.247.254"
+$env:API_ENDPOINT = "http://20.122.236.211"
