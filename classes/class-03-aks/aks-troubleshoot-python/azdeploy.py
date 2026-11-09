@@ -2,7 +2,7 @@
 # Change the values of these variables as needed.
 # =============================================================================
 
-rg = "ai-200"  # Resource Group name
+rg = "ai-200-aks"  # Resource Group name
 location = "eastus2"   # Azure region for the resources
 
 # If the Standard_D2s_v7 SKU is not available in your region, try using Standard_D2s_v5, or Standard_D2s_v6 instead.
