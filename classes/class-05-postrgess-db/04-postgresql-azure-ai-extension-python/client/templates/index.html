@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotel Review Insights</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --text: #1d2330; --muted: #5d6677; --border: #dde1e8;
+    --accent: #0f6cbd; --accent-soft: #e6f0fa; --code-bg: #0f1724; --code-text: #d7e3f4;
+    --pos: #1a7f37; --pos-soft: #dcf3e2; --neg: #c42b1c; --neg-soft: #fbe3e0;
+    --neu: #8a6d00; --neu-soft: #fbf1cc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151c; --panel: #1a2029; --text: #e6e9ef; --muted: #9aa4b5; --border: #2c3442;
+      --accent: #4da3ff; --accent-soft: #1b2d44; --code-bg: #0b0f16; --code-text: #cfe0f5;
+      --pos: #4ac26b; --pos-soft: #17331f; --neg: #ff7b72; --neg-soft: #3b1d1b;
+      --neu: #e3b341; --neu-soft: #3a3016;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  header { padding: 28px 24px 8px; max-width: 1180px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 26px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  .models { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft);
+          color: var(--accent); border: 1px solid var(--border); }
+  nav { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--border); }
+  nav .inner { max-width: 1180px; margin: 0 auto; padding: 0 16px; display: flex; gap: 4px; overflow-x: auto; }
+  nav button { background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted);
+               padding: 12px 12px; font: inherit; cursor: pointer; white-space: nowrap; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 60px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+          padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 6px; font-size: 18px; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .hint { color: var(--muted); margin: 0 0 12px; }
+  code.fn { background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 4px;
+            font-size: 13px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type=text], textarea, select { font: inherit; color: var(--text); background: var(--bg);
+          border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+  input[type=text] { flex: 1; min-width: 220px; }
+  textarea { width: 100%; min-height: 110px; resize: vertical; }
+  button.btn { font: inherit; border: 1px solid var(--accent); background: var(--accent); color: #fff;
+               padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+  button.btn.secondary { background: transparent; color: var(--accent); }
+  button.btn.danger { background: transparent; color: var(--neg); border-color: var(--neg); }
+  button.btn:disabled { opacity: .55; cursor: wait; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border);
+          background: var(--bg); cursor: pointer; color: var(--text); }
+  .result { margin-top: 14px; }
+  details.sql { margin-top: 10px; }
+  details.sql summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre { background: var(--code-bg); color: var(--code-text); padding: 12px 14px; border-radius: 8px;
+        overflow-x: auto; font: 12.5px/1.5 Consolas, "Cascadia Code", monospace; margin: 8px 0 0;
+        white-space: pre-wrap; word-break: break-word; }
+  .meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .error { background: var(--neg-soft); color: var(--neg); padding: 10px 12px; border-radius: 8px;
+           white-space: pre-wrap; font-size: 13px; }
+  .table-wrap { overflow-x: auto; margin-top: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+  .badge.positive { background: var(--pos-soft); color: var(--pos); }
+  .badge.negative { background: var(--neg-soft); color: var(--neg); }
+  .badge.neutral, .badge.mixed { background: var(--neu-soft); color: var(--neu); }
+  .hotels { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .hotel { border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--bg); }
+  .hotel strong { display: block; }
+  .bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 8px 0 4px; background: var(--border); }
+  .bar span.p { background: var(--pos); } .bar span.n { background: var(--neu); } .bar span.x { background: var(--neg); }
+  .steps { counter-reset: s; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .step { position: relative; padding-left: 40px; }
+  .step::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 0;
+                  width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff;
+                  display: grid; place-items: center; font-weight: 700; }
+  .answer { font-size: 16px; padding: 12px 14px; border-left: 4px solid var(--accent);
+            background: var(--accent-soft); border-radius: 6px; }
+  .flow { font-size: 13px; color: var(--muted); }
+  .flow b { color: var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hotel Review Insights</h1>
+  <p>Toda la IA se ejecuta <b>dentro de PostgreSQL</b> con la extensión <code class="fn">azure_ai</code>. La app solo envía SQL.</p>
+  <div class="models">
+    <span class="pill">Embeddings: {{ embedding_deployment }}</span>
+    <span class="pill">Chat: {{ chat_deployment }}</span>
+    <span class="pill">Azure AI Language (Foundry)</span>
+  </div>
+</header>
+
+<nav><div class="inner">
+  <button class="active" data-tab="setup">1 · Preparar</button>
+  <button data-tab="enrich">2 · Enriquecer con IA</button>
+  <button data-tab="search">3 · Búsqueda semántica</button>
+  <button data-tab="lab">4 · Laboratorio de texto</button>
+  <button data-tab="semantic">5 · Operadores semánticos</button>
+</div></nav>
+
+<main>
+  <!-- 1. SETUP -->
+  <section class="tab active" id="tab-setup">
+    <div class="card">
+      <h2>¿Qué hace la extensión azure_ai?</h2>
+      <p class="hint">Agrega funciones SQL que llaman a los servicios de Microsoft Foundry desde el propio servidor de PostgreSQL.</p>
+      <div class="steps">
+        <div class="step"><b>azure_openai</b><br><span class="flow">Embeddings con un modelo de Foundry: <code class="fn">create_embeddings()</code></span></div>
+        <div class="step"><b>azure_cognitive</b><br><span class="flow">Azure AI Language: sentimiento, idioma, frases clave, entidades, PII, resúmenes</span></div>
+        <div class="step"><b>azure_ai (preview)</b><br><span class="flow">Operadores semánticos con LLM: <code class="fn">generate()</code>, <code class="fn">is_true()</code>, <code class="fn">extract()</code></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Paso 1 · Instalar extensiones y configurar endpoints</h2>
+      <p class="hint"><code class="fn">CREATE EXTENSION azure_ai</code> + <code class="fn">azure_ai.set_setting()</code> con el endpoint y la key de Foundry. Después crea la tabla <code class="fn">hotel_reviews</code> con una columna <code class="fn">vector(1536)</code>.</p>
+      <div class="row">
+        <button class="btn" onclick="run(this, '/api/setup', null, 'setup-out')">Ejecutar setup</button>
+        <button class="btn secondary" onclick="run(this, '/api/load', null, 'setup-out')">Cargar 24 reseñas (solo texto)</button>
+        <button class="btn danger" onclick="if(confirm('¿Borrar la tabla hotel_reviews?')) run(this, '/api/reset', null, 'setup-out')">Reiniciar tabla</button>
+      </div>
+      <div class="result" id="setup-out"></div>
+    </div>
+  </section>
+
+  <!-- 2. ENRICH -->
+  <section class="tab" id="tab-enrich">
+    <div class="card">
+      <h2>Paso 2 · Enriquecer todas las reseñas con un solo UPDATE</h2>
+      <p class="hint">Por cada fila: <code class="fn">detect_language</code> → <code class="fn">analyze_sentiment</code> → <code class="fn">extract_key_phrases</code> → <code class="fn">create_embeddings</code>. Son unas 100 llamadas a Foundry, todas desde el servidor de base de datos (tarda unos 30-60 s).</p>
+      <div class="row">
+        <button class="btn" onclick="run(this, '/api/enrich', null, 'enrich-out').then(loadReviews)">Enriquecer con IA</button>
+        <button class="btn secondary" onclick="loadReviews()">Refrescar datos</button>
+      </div>
+      <div class="result" id="enrich-out"></div>
+    </div>
+    <div class="card">
+      <h3>Sentimiento por hotel</h3>
+      <div class="hotels" id="hotels"><p class="hint">Sin datos todavía.</p></div>
+    </div>
+    <div class="card">
+      <h3>Reseñas</h3>
+      <div class="table-wrap" id="reviews"></div>
+    </div>
+  </section>
+
+  <!-- 3. SEARCH -->
+  <section class="tab" id="tab-search">
+    <div class="card">
+      <h2>Paso 3 · Búsqueda semántica (pgvector)</h2>
+      <p class="hint">El embedding de la pregunta <b>también</b> se genera en SQL con <code class="fn">azure_openai.create_embeddings()</code> y se compara con el operador de distancia coseno <code class="fn">&lt;=&gt;</code>. Busca en cualquier idioma: encuentra reseñas en español, inglés y portugués.</p>
+      <div class="row">
+        <input type="text" id="q" placeholder="Ej.: problemas con el ruido por la noche" onkeydown="if(event.key==='Enter') doSearch()">
+        <select id="q-sent">
+          <option value="">Cualquier sentimiento</option>
+          <option value="positive">Solo positivas</option>
+          <option value="negative">Solo negativas</option>
+          <option value="mixed">Mixtas</option>
+        </select>
+        <button class="btn" id="q-btn" onclick="doSearch()">Buscar</button>
+      </div>
+      <div class="chips">
+        <span class="chip" onclick="setQ('q','problemas con el ruido por la noche')">ruido por la noche</span>
+        <span class="chip" onclick="setQ('q','viajar con niños o mascotas')">niños o mascotas</span>
+        <span class="chip" onclick="setQ('q','great breakfast')">great breakfast</span>
+        <span class="chip" onclick="setQ('q','me cobraron mal o perdieron mi reserva')">problemas de cobro o reserva</span>
+        <span class="chip" onclick="setQ('q','lugar romántico para luna de miel')">luna de miel</span>
+      </div>
+      <div class="result" id="search-out"></div>
+    </div>
+  </section>
+
+  <!-- 4. TEXT LAB -->
+  <section class="tab" id="tab-lab">
+    <div class="card">
+      <h2>Paso 4 · Laboratorio de texto: Azure AI Language desde SQL</h2>
+      <p class="hint">Escribe o pega cualquier texto y prueba cada función de <code class="fn">azure_cognitive</code>. Para ver un resumen útil con <code class="fn">summarize_abstractive</code>, pega un texto largo (varios párrafos).</p>
+      <textarea id="lab-text">Me alojé en el hotel Urban Loft de Madrid del 3 al 6 de octubre. La recepcionista María López fue encantadora, pero el aire acondicionado no funcionaba y nadie lo arregló. Si quieren contactarme, mi correo es pedro.gomez@example.com y mi teléfono es +34 612 345 678.</textarea>
+      <div class="row" style="margin-top:10px">
+        <label class="flow">Idioma:
+          <select id="lab-lang"><option value="es">es</option><option value="en">en</option><option value="pt">pt</option></select>
+        </label>
+        <button class="btn secondary" onclick="analyze(this,'language')">detect_language</button>
+        <button class="btn secondary" onclick="analyze(this,'sentiment')">analyze_sentiment</button>
+        <button class="btn secondary" onclick="analyze(this,'key_phrases')">extract_key_phrases</button>
+        <button class="btn secondary" onclick="analyze(this,'entities')">recognize_entities</button>
+        <button class="btn secondary" onclick="analyze(this,'pii')">recognize_pii_entities</button>
+        <button class="btn secondary" onclick="analyze(this,'summary')">summarize_abstractive</button>
+        <button class="btn secondary" onclick="analyze(this,'embedding')">create_embeddings</button>
+      </div>
+      <div class="result" id="lab-out"></div>
+    </div>
+  </section>
+
+  <!-- 5. SEMANTIC OPERATORS -->
+  <section class="tab" id="tab-semantic">
+    <div class="card">
+      <h2>5a · Preguntar a las reseñas: <code class="fn">azure_ai.generate()</code></h2>
+      <p class="hint">RAG <b>100 % en SQL</b>: búsqueda vectorial de las 6 reseñas más relevantes y respuesta del modelo de chat de Foundry en la misma consulta.</p>
+      <div class="row">
+        <input type="text" id="ask" placeholder="Ej.: ¿Qué hotel recomiendas para ir con niños?" onkeydown="if(event.key==='Enter') doAsk()">
+        <button class="btn" id="ask-btn" onclick="doAsk()">Preguntar</button>
+      </div>
+      <div class="chips">
+        <span class="chip" onclick="setQ('ask','¿Qué hotel recomiendas para ir con niños?')">¿Hotel para niños?</span>
+        <span class="chip" onclick="setQ('ask','¿Cuáles son las quejas más comunes sobre la limpieza?')">quejas de limpieza</span>
+        <span class="chip" onclick="setQ('ask','¿Dónde se desayuna mejor?')">mejor desayuno</span>
+      </div>
+      <div class="result" id="ask-out"></div>
+    </div>
+    <div class="card">
+      <h2>5b · Filtro en lenguaje natural: <code class="fn">azure_ai.is_true()</code></h2>
+      <p class="hint">Primero, la búsqueda vectorial (barata) elige 8 candidatas. Después, el LLM evalúa una condición en lenguaje natural sobre cada fila del <code class="fn">WHERE</code>.</p>
+      <div class="row">
+        <input type="text" id="cond" placeholder="Ej.: The guest had a problem with money or a refund" onkeydown="if(event.key==='Enter') doFilter()">
+        <button class="btn" id="cond-btn" onclick="doFilter()">Filtrar</button>
+      </div>
+      <div class="chips">
+        <span class="chip" onclick="setQ('cond','El huésped tuvo un problema con dinero o un reembolso')">problema con dinero</span>
+        <span class="chip" onclick="setQ('cond','La reseña menciona a un empleado por su nombre')">menciona a un empleado</span>
+        <span class="chip" onclick="setQ('cond','El huésped viajaba con niños o mascotas')">con niños o mascotas</span>
+      </div>
+      <div class="result" id="cond-out"></div>
+    </div>
+    <div class="card">
+      <h2>5c · Extraer datos estructurados: <code class="fn">azure_ai.extract()</code></h2>
+      <p class="hint">Convierte texto libre en JSON (limpieza, empleados mencionados, queja principal, ¿volvería?).</p>
+      <div class="row">
+        <select id="extract-id" style="flex:1;min-width:220px"><option value="">Carga las reseñas primero (paso 1)</option></select>
+        <button class="btn" id="extract-btn" onclick="doExtract()">Extraer</button>
+      </div>
+      <div class="result" id="extract-out"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ---------- Tabs ----------
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('active', s.id === 'tab-' + b.dataset.tab));
+  if (b.dataset.tab === 'enrich') loadReviews();
+});
+
+// ---------- Helpers ----------
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const setQ = (id, text) => { document.getElementById(id).value = text; document.getElementById(id + '-btn')?.click(); };
+
+function cell(v, key) {
+  if (v === null || v === undefined) return '<span class="flow">null</span>';
+  if (key === 'sentiment') return `<span class="badge ${esc(v)}">${esc(v)}</span>`;
+  if (Array.isArray(v)) return v.length && typeof v[0] !== 'object'
+      ? `<div class="chips" style="margin:0">${v.map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>`
+      : `<pre>${esc(JSON.stringify(v, null, 2))}</pre>`;
+  if (typeof v === 'object') return `<pre>${esc(JSON.stringify(v, null, 2))}</pre>`;
+  if (typeof v === 'boolean') return v ? '✅' : '—';
+  return esc(v);
+}
+
+function table(rows, skip = []) {
+  if (!rows || !rows.length) return '<p class="hint">Sin filas.</p>';
+  const cols = Object.keys(rows[0]).filter(c => !skip.includes(c));
+  return `<div class="table-wrap"><table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${cols.map(c => `<td>${cell(r[c], c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function sqlBlock(data, open = false) {
+  return `<details class="sql" ${open ? 'open' : ''}><summary>SQL ejecutado en PostgreSQL</summary><pre>${esc(data.sql)}</pre></details>
+    <div class="meta">⏱ ${data.elapsed_ms} ms · ${data.rowcount >= 0 ? data.rowcount : 0} fila(s)</div>`;
+}
+
+async function call(url, body) {
+  const res = await fetch(url, { method: body === undefined ? 'GET' : 'POST',
+    headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body ?? {}) });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+async function run(btn, url, body, outId, render) {
+  const out = document.getElementById(outId);
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Ejecutando…';
+  out.innerHTML = '<p class="hint">Llamando a Foundry desde PostgreSQL…</p>';
+  try {
+    const data = await call(url, body);
+    out.innerHTML = (render ? render(data) : table(data.rows)) + sqlBlock(data, !render);
+    return data;
+  } catch (e) {
+    out.innerHTML = `<div class="error">${esc(e.message)}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+
+// ---------- Step 2: reviews + stats ----------
+async function loadReviews() {
+  try {
+    const data = await call('/api/reviews');
+    const hotels = data.stats.rows;
+    document.getElementById('hotels').innerHTML = hotels.length ? hotels.map(h => {
+      const t = h.reviews || 1;
+      return `<div class="hotel"><strong>${esc(h.hotel)}</strong><span class="flow">${esc(h.city)} · ⭐ ${h.avg_rating} · ${h.reviews} reseñas</span>
+        <div class="bar"><span class="p" style="width:${h.positive / t * 100}%"></span><span class="n" style="width:${h.neutral / t * 100}%"></span><span class="x" style="width:${h.negative / t * 100}%"></span></div>
+        <span class="flow">😊 ${h.positive} · 😐 ${h.neutral} · 😞 ${h.negative}</span></div>`;
+    }).join('') : '<p class="hint">Sin datos todavía.</p>';
+    document.getElementById('reviews').innerHTML = table(data.rows, ['id']);
+    const sel = document.getElementById('extract-id');
+    if (data.rows.length) sel.innerHTML = data.rows.map(r =>
+      `<option value="${r.id}">#${r.id} ${esc(r.hotel)} · ${esc(r.review_text.slice(0, 70))}…</option>`).join('');
+  } catch (e) {
+    document.getElementById('reviews').innerHTML = `<div class="error">${esc(e.message)}</div>`;
+  }
+}
+
+// ---------- Step 3: search ----------
+function doSearch() {
+  const query = document.getElementById('q').value.trim();
+  if (!query) return;
+  run(document.getElementById('q-btn'), '/api/search',
+      { query, sentiment: document.getElementById('q-sent').value }, 'search-out',
+      d => table(d.rows, ['id']));
+}
+
+// ---------- Step 4: text lab ----------
+function analyze(btn, operation) {
+  run(btn, '/api/analyze', { operation, text: document.getElementById('lab-text').value,
+       lang: document.getElementById('lab-lang').value }, 'lab-out', d => table(d.rows));
+}
+
+// ---------- Step 5: semantic operators ----------
+function doAsk() {
+  const question = document.getElementById('ask').value.trim();
+  if (!question) return;
+  run(document.getElementById('ask-btn'), '/api/semantic/ask', { question }, 'ask-out', d => {
+    const r = d.rows[0] || {};
+    return `<div class="answer">${esc(r.answer)}</div>
+      <details class="sql"><summary>Contexto recuperado con búsqueda vectorial</summary><pre>${esc(r.context_used)}</pre></details>`;
+  });
+}
+
+function doFilter() {
+  const condition = document.getElementById('cond').value.trim();
+  if (!condition) return;
+  run(document.getElementById('cond-btn'), '/api/semantic/filter', { condition }, 'cond-out',
+      d => `<p class="hint">El LLM aceptó <b>${d.rows.length}</b> de 8 candidatas.</p>` + table(d.rows, ['id']));
+}
+
+function doExtract() {
+  const id = document.getElementById('extract-id').value;
+  if (!id) return;
+  run(document.getElementById('extract-btn'), '/api/semantic/extract', { id }, 'extract-out', d => {
+    const r = d.rows[0] || {};
+    return `<p><b>${esc(r.hotel)}</b>: “${esc(r.review_text)}”</p><pre>${esc(JSON.stringify(r.extracted, null, 2))}</pre>`;
+  });
+}
+
+loadReviews();
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "reviews": [
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 5, "review_text": "La vista al mar desde la habitación es espectacular. El desayuno buffet tenía frutas frescas y el personal de recepción, especialmente Carla, fue muy amable. Volveremos sin duda."},
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 2, "review_text": "La habitación olía a humedad y el aire acondicionado hacía mucho ruido toda la noche. Pedimos un cambio de habitación y nos dijeron que el hotel estaba lleno."},
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 4, "review_text": "Great location in Miraflores, walking distance to the boardwalk and many restaurants. The room was clean but a bit small for a family of four."},
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 1, "review_text": "Me cobraron dos veces la estadía en la tarjeta. Llamé al 987 654 321 y escribí a reservas@miradorpacifico.example pero nadie responde. Pésimo servicio al cliente."},
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 5, "review_text": "Perfect for a business trip. Fast wifi, quiet rooms and the staff arranged an early breakfast for my 6 am flight to Cusco."},
+    {"hotel": "Mirador del Pacífico", "city": "Lima", "rating": 3, "review_text": "O hotel é bonito e bem localizado, mas o café da manhã é sempre o mesmo e a piscina estava fechada para manutenção durante toda a nossa estadia."},
+
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 5, "review_text": "Un hotel boutique precioso dentro de la ciudad amurallada. La terraza con piscina al atardecer es mágica y el cóctel de bienvenida fue un gran detalle."},
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 4, "review_text": "Beautiful colonial architecture and very attentive staff. The only downside is the street noise on weekend nights, bring earplugs."},
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 2, "review_text": "Las fotos engañan: la habitación era oscura, el baño tenía moho y el agua caliente se acababa enseguida. Por ese precio esperaba mucho más."},
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 5, "review_text": "Passamos nossa lua de mel aqui e foi perfeito. A equipe decorou o quarto com flores e nos deu dicas ótimas de passeios para as Ilhas do Rosário."},
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 3, "review_text": "Good breakfast and friendly people, but the wifi barely worked in our room and the air conditioning dripped water on the floor."},
+    {"hotel": "Casa Colonial", "city": "Cartagena", "rating": 1, "review_text": "Llegamos a las 11 de la noche y no encontraron nuestra reserva a nombre de Jorge Ramírez. Tuvimos que buscar otro hotel con dos niños cansados. Inaceptable."},
+
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 5, "review_text": "Diseño moderno, cama comodísima y a dos calles de la Gran Vía. El check-in digital fue rapidísimo y la limpieza impecable."},
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 4, "review_text": "Stylish rooms and an excellent rooftop bar with views of the city. Breakfast is expensive for what it is, so we ate at the cafés nearby."},
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 2, "review_text": "The walls are paper thin. We could hear our neighbours talking until 3 am and the front desk did nothing when we complained."},
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 4, "review_text": "Ótima localização para conhecer Madri a pé. O quarto era pequeno, mas muito limpo e bem pensado. O atendimento da recepção foi excelente."},
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 3, "review_text": "Bien ubicado y limpio, pero el ascensor estuvo averiado dos días y nuestra habitación estaba en el sexto piso. Nos ofrecieron un descuento, algo es algo."},
+    {"hotel": "Urban Loft", "city": "Madrid", "rating": 5, "review_text": "Viajé con mi perro y fue la mejor experiencia pet friendly que he tenido: cama para mascotas, comedero y un mapa de parques cercanos. Gracias, Lucía."},
+
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 5, "review_text": "Pousada encantadora a poucos passos da praia. Café da manhã caseiro delicioso, com bolo de banana e frutas tropicais. Os donos são muito simpáticos."},
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 2, "review_text": "Muitos mosquitos no quarto e a tela da janela estava rasgada. O chuveiro elétrico dava choque. Não recomendo para quem viaja com crianças."},
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 4, "review_text": "Lovely guesthouse near the beach with a peaceful garden. Parking is limited and the road to get there is not paved, but it is worth it."},
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 5, "review_text": "Lugar tranquilo, ideal para desconectarse. Hicimos surf todas las mañanas y la pousada nos prestó las tablas sin costo. El desayuno fue lo mejor del viaje."},
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 3, "review_text": "The room was charming but the bathroom was shared with another room, which was not mentioned in the listing. Breakfast was great though."},
+    {"hotel": "Pousada Sol", "city": "Florianópolis", "rating": 1, "review_text": "Fizemos a reserva e pagamos adiantado, mas ao chegar disseram que houve overbooking. O reembolso ainda não caiu na minha conta. Contato: ana.souza@example.com."}
+  ]
+}

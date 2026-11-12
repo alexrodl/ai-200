@@ -2,24 +2,23 @@
 Flask application for comparing vector index performance in Azure Cosmos DB.
 
 This app demonstrates how different vector indexing strategies (flat, quantizedFlat,
-diskANN) affect query performance and RU consumption. Users can load sample data,
-run vector similarity searches, and compare results side-by-side.
+diskANN) affect query performance and RU consumption. Users load 5,000 support
+tickets embedded with an Azure OpenAI model, run vector similarity searches, and
+compare results side-by-side.
 """
-import json
 import logging
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 
 from index_functions import (
     bulk_load_documents,
+    clear_all_containers,
     compare_index_performance,
     compare_filtered_performance,
     get_all_categories,
-    get_all_document_counts,
-    CONTAINER_FLAT,
-    CONTAINER_QUANTIZED,
-    CONTAINER_DISKANN
+    get_all_document_counts
 )
+from large_dataset import load_large_dataset, LARGE_DOCUMENT_COUNT
 
 logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
@@ -27,19 +26,16 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 
-def load_json_file(filename):
-    """Load documents and queries from a JSON file."""
-    filepath = os.path.join(os.path.dirname(__file__), filename)
-    with open(filepath, "r") as f:
-        data = json.load(f)
-    return data
-
-
 def get_sample_queries():
-    """Get the pre-computed query vectors from the sample data file."""
+    """
+    Get the pre-computed query vectors.
+
+    The queries are embedded with the same Azure OpenAI model as the documents
+    (text-embedding-3-small, 256 dimensions), so vector distance reflects meaning.
+    They are available once the dataset has been generated (large_vectors.json).
+    """
     try:
-        data = load_json_file("sample_vectors.json")
-        return data.get("queries", [])
+        return load_large_dataset(create_if_missing=False).get("queries", [])
     except Exception:
         return []
 
@@ -55,24 +51,32 @@ def index():
         "index.html",
         categories=categories,
         queries=queries,
-        document_counts=document_counts
+        document_counts=document_counts,
+        large_document_count=LARGE_DOCUMENT_COUNT
     )
 
 
 @app.route("/load-data", methods=["POST"])
 def load_data():
-    """Load sample documents with embeddings into all three containers using parallel processing."""
+    """
+    Load 5,000 synthetic support tickets with real Azure OpenAI embeddings into
+    all three containers.
+
+    quantizedFlat and diskANN need roughly 1,000+ vectors before they build their
+    quantized / graph structures; with fewer vectors Cosmos DB does a full scan.
+    Loading the same data into the flat container lets us compare the RU cost of
+    an exact (full scan) search against the other index types at this scale.
+    """
     try:
-        data = load_json_file("sample_vectors.json")
+        # Generates and caches the embeddings the first time (large_vectors.json)
+        data = load_large_dataset()
         documents = data.get("documents", [])
 
-        # Use bulk loader with parallel processing for faster uploads
-        result = bulk_load_documents(documents)
-        loaded_count = result["loaded_count"]
+        result = bulk_load_documents(documents, max_workers=20)
         total_ru = result["total_ru"]
 
         flash(
-            f"Loaded {loaded_count} documents to all containers. "
+            f"Loaded {result['loaded_count']} of {len(documents)} documents to all containers. "
             f"RU costs - flat: {total_ru['flat']:.2f}, "
             f"quantizedFlat: {total_ru['quantizedFlat']:.2f}, "
             f"diskANN: {total_ru['diskANN']:.2f}",
@@ -80,6 +84,22 @@ def load_data():
         )
     except Exception as e:
         flash(f"Error loading data: {str(e)}", "error")
+
+    return redirect(url_for("index"))
+
+
+@app.route("/clear-data", methods=["POST"])
+def clear_data():
+    """Delete all documents from the three containers (the containers are kept)."""
+    try:
+        deleted = clear_all_containers()
+        flash(
+            f"Deleted documents - flat: {deleted['flat']}, "
+            f"quantizedFlat: {deleted['quantizedFlat']}, diskANN: {deleted['diskANN']}",
+            "success"
+        )
+    except Exception as e:
+        flash(f"Error deleting data: {str(e)}", "error")
 
     return redirect(url_for("index"))
 

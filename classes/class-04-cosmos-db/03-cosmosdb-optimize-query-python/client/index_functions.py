@@ -15,6 +15,12 @@ from azure.identity import DefaultAzureCredential
 CONTAINER_FLAT = "vectors-flat"
 CONTAINER_QUANTIZED = "vectors-quantized"
 CONTAINER_DISKANN = "vectors-diskann"
+ALL_CONTAINERS = [CONTAINER_FLAT, CONTAINER_QUANTIZED, CONTAINER_DISKANN]
+CONTAINER_INDEX_TYPES = {
+    CONTAINER_FLAT: "flat",
+    CONTAINER_QUANTIZED: "quantizedFlat",
+    CONTAINER_DISKANN: "diskANN"
+}
 
 # Cached singletons reused across all threads so we don't re-auth or rebuild
 # the connection pool on every operation (the parallel bulk loader can fan
@@ -115,9 +121,11 @@ def store_to_all_containers(
     chunk_id: str,
     content: str,
     embedding: list,
-    metadata: dict = None
+    metadata: dict = None,
+    container_names: list = None
 ) -> dict:
-    """Store a document to all three containers in parallel for faster loading."""
+    """Store a document to the given containers (all three by default) in parallel."""
+    container_names = container_names or ALL_CONTAINERS
     results = {}
 
     def upload_to_container(container_name):
@@ -126,10 +134,10 @@ def store_to_all_containers(
         )
 
     # Upload to all containers simultaneously using threads
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=len(container_names)) as executor:
         futures = [
             executor.submit(upload_to_container, name)
-            for name in [CONTAINER_FLAT, CONTAINER_QUANTIZED, CONTAINER_DISKANN]
+            for name in container_names
         ]
         for future in as_completed(futures):
             container_name, result = future.result()
@@ -138,13 +146,20 @@ def store_to_all_containers(
     return results
 
 
-def bulk_load_documents(documents: list, progress_callback=None) -> dict:
+def bulk_load_documents(
+    documents: list,
+    progress_callback=None,
+    container_names: list = None,
+    max_workers: int = 10
+) -> dict:
     """
-    Load multiple documents to all containers with parallel processing.
+    Load multiple documents to the given containers with parallel processing.
 
     Args:
         documents: List of document dictionaries with document_id, chunk_id, content, embedding, metadata
         progress_callback: Optional callback function(loaded, total) for progress updates
+        container_names: Target containers (default: all three)
+        max_workers: Number of documents uploaded concurrently
 
     Returns:
         Dictionary with loaded_count and total_ru per container
@@ -155,7 +170,9 @@ def bulk_load_documents(documents: list, progress_callback=None) -> dict:
 
     # Process documents in batches using thread pool
     # Each document uploads to all 3 containers in parallel
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    container_names = container_names or ALL_CONTAINERS
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
         for doc in documents:
             future = executor.submit(
@@ -164,7 +181,8 @@ def bulk_load_documents(documents: list, progress_callback=None) -> dict:
                 chunk_id=doc["chunk_id"],
                 content=doc["content"],
                 embedding=doc["embedding"],
-                metadata=doc.get("metadata")
+                metadata=doc.get("metadata"),
+                container_names=container_names
             )
             futures[future] = doc
 
@@ -174,9 +192,8 @@ def bulk_load_documents(documents: list, progress_callback=None) -> dict:
                 loaded_count += 1
 
                 # Track RU by container
-                total_ru["flat"] += results[CONTAINER_FLAT]["ru_charge"]
-                total_ru["quantizedFlat"] += results[CONTAINER_QUANTIZED]["ru_charge"]
-                total_ru["diskANN"] += results[CONTAINER_DISKANN]["ru_charge"]
+                for container_name, result in results.items():
+                    total_ru[CONTAINER_INDEX_TYPES[container_name]] += result["ru_charge"]
 
                 if progress_callback:
                     progress_callback(loaded_count, total)
@@ -187,6 +204,33 @@ def bulk_load_documents(documents: list, progress_callback=None) -> dict:
     return {
         "loaded_count": loaded_count,
         "total_ru": total_ru
+    }
+
+
+def clear_container(container_name: str, max_workers: int = 20) -> int:
+    """Delete every document in a container. Returns the number of deleted documents."""
+    container = get_container(container_name)
+    items = list(container.query_items(
+        query="SELECT c.id, c.documentId FROM c",
+        enable_cross_partition_query=True
+    ))
+
+    def delete(item):
+        try:
+            container.delete_item(item=item["id"], partition_key=item["documentId"])
+            return 1
+        except exceptions.CosmosResourceNotFoundError:
+            return 0
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        return sum(executor.map(delete, items))
+
+
+def clear_all_containers() -> dict:
+    """Delete all documents from the three containers."""
+    return {
+        CONTAINER_INDEX_TYPES[name]: clear_container(name)
+        for name in ALL_CONTAINERS
     }
 
 

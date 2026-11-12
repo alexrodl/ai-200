@@ -41,9 +41,17 @@
             <!-- Load Sample Data -->
             <section class="section section-load">
                 <h2>Load Sample Data</h2>
-                <p>Load sample support tickets with pre-computed 256-dimensional embeddings to all three containers.</p>
+                <p>
+                    Load {{ large_document_count|default(5000) }} synthetic support tickets embedded with Azure OpenAI
+                    <strong>text-embedding-3-small</strong> (256 dimensions) to all three containers.
+                    quantizedFlat and diskANN need about 1,000+ vectors before their indexes are really used.
+                </p>
                 <form action="/load-data" method="post" id="load-data-form">
-                    <button type="submit" class="btn-success" id="load-data-btn">Load Data to All Containers</button>
+                    <button type="submit" class="btn-success" id="load-data-btn">Load {{ large_document_count|default(5000) }} Docs to All Containers</button>
+                </form>
+                <form action="/clear-data" method="post" id="clear-data-form"
+                      onsubmit="return confirm('Delete ALL documents from the three containers?');">
+                    <button type="submit" class="btn-primary" id="clear-data-btn">Delete All Documents</button>
                 </form>
             </section>
 
@@ -54,7 +62,7 @@
                 <form action="/compare-search" method="post">
                     <label for="query_id">Select Query</label>
                     <select id="query_id" name="query_id" required>
-                        <option value="">-- Select a query --</option>
+                        <option value="">{{ '-- Select a query --' if queries else '-- Load the data first --' }}</option>
                         {% for query in queries %}
                             <option value="{{ query.id }}">{{ query.description }}</option>
                         {% endfor %}
@@ -76,7 +84,7 @@
                 <form action="/compare-filtered" method="post">
                     <label for="filtered_query_id">Select Query</label>
                     <select id="filtered_query_id" name="filtered_query_id" required>
-                        <option value="">-- Select a query --</option>
+                        <option value="">{{ '-- Select a query --' if queries else '-- Load the data first --' }}</option>
                         {% for query in queries %}
                             <option value="{{ query.id }}">{{ query.description }}</option>
                         {% endfor %}
@@ -160,7 +168,7 @@
                             <div class="comparison-column">
                                 <h4>{{ index_type }}</h4>
                                 {% if data.status == 'success' and data.results %}
-                                    {% for item in data.results[:3] %}
+                                    {% for item in data.results %}
                                         <div class="chunk-card compact">
                                             <div class="chunk-id">
                                                 {{ item.document_id }}
@@ -234,7 +242,7 @@
                             <div class="comparison-column">
                                 <h4>{{ index_type }}</h4>
                                 {% if data.status == 'success' and data.results %}
-                                    {% for item in data.results[:3] %}
+                                    {% for item in data.results %}
                                         <div class="chunk-card compact">
                                             <div class="chunk-id">
                                                 {{ item.document_id }}
@@ -271,7 +279,7 @@
                             <p>Results will appear here after you perform an action.</p>
                             <p><strong>Getting started:</strong></p>
                             <ol>
-                                <li>Click "Load Data to All Containers" to populate the containers with sample data</li>
+                                <li>Click "Load {{ large_document_count|default(5000) }} Docs to All Containers" to populate the containers</li>
                                 <li>Select a query and click "Compare Index Performance"</li>
                                 <li>Review the RU costs and execution times for each index type</li>
                             </ol>
@@ -281,7 +289,7 @@
                     <div class="loading-state" id="loading-message" style="display: none;" role="status" aria-live="polite">
                         <div class="loading-spinner" aria-hidden="true"></div>
                         <p><strong>Uploading data to containers...</strong></p>
-                        <p>This typically takes 30-45 seconds. Please wait.</p>
+                        <p id="loading-wait-text">This can take several minutes. Please wait.</p>
                     </div>
                 {% endif %}
             </section>
@@ -289,10 +297,13 @@
     </main>
 
     <script>
-        // Show loading message when Load Data button is clicked
-        document.getElementById('load-data-form').addEventListener('submit', function(e) {
+        // Show loading message when a Load Data button is clicked
+        function showLoading(formId, btnId, waitText) {
+          var form = document.getElementById(formId);
+          if (!form) { return; }
+          form.addEventListener('submit', function(e) {
             // Disable the button to prevent double-clicks
-            var btn = document.getElementById('load-data-btn');
+            var btn = document.getElementById(btnId);
             btn.disabled = true;
             btn.textContent = 'Uploading...';
             btn.classList.add('btn-disabled');
@@ -306,10 +317,16 @@
             }
             if (loadingMsg) {
                 loadingMsg.style.display = 'block';
+                var waitMsg = document.getElementById('loading-wait-text');
+                if (waitMsg) { waitMsg.textContent = waitText; }
             }
 
             // Allow the form to submit normally
-        });
+          });
+        }
+
+        showLoading('load-data-form', 'load-data-btn',
+            'Generating embeddings (first time only) and uploading 5,000 documents to 3 containers. This can take several minutes.');
     </script>
 </body>
 </html>

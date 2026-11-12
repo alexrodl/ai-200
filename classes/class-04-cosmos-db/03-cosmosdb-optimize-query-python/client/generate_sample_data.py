@@ -1,8 +1,9 @@
 """
-Generate sample vector data for the Cosmos DB index comparison exercise.
-Creates 500 support ticket documents with 256-dimensional embeddings.
+Content templates for the synthetic support tickets used in this exercise.
+
+large_dataset.py uses CATEGORIES and fill_template() to build 5,000 tickets and
+then embeds them with an Azure OpenAI model (text-embedding-3-small).
 """
-import json
 import random
 
 # Categories and their associated content templates
@@ -97,28 +98,6 @@ CATEGORIES = {
     }
 }
 
-# Query templates for testing
-QUERY_TEMPLATES = [
-    {"id": "query-login-issue", "description": "I can't login to my account"},
-    {"id": "query-double-charge", "description": "My payment was charged twice"},
-    {"id": "query-missing-package", "description": "Package hasn't arrived yet"},
-    {"id": "query-account-security", "description": "Protect my account from hackers"},
-    {"id": "query-product-broken", "description": "My product stopped working"},
-    {"id": "query-refund-request", "description": "I need a refund for my order"},
-    {"id": "query-app-crash", "description": "The mobile app keeps crashing"},
-    {"id": "query-change-address", "description": "Update my shipping address"},
-]
-
-def generate_embedding(dim=256, seed=None):
-    """Generate a random normalized embedding vector."""
-    if seed:
-        random.seed(seed)
-    # Generate random values
-    vec = [random.uniform(-1, 1) for _ in range(dim)]
-    # Normalize to unit length (approximation for cosine similarity)
-    magnitude = sum(v**2 for v in vec) ** 0.5
-    return [round(v / magnitude, 3) for v in vec]
-
 def fill_template(template, category):
     """Fill a template with random realistic values."""
     replacements = {
@@ -191,86 +170,3 @@ def fill_template(template, category):
     for key, value in replacements.items():
         result = result.replace(key, value)
     return result
-
-def generate_documents(count=500):
-    """Generate a list of sample documents."""
-    documents = []
-    categories = list(CATEGORIES.keys())
-
-    for i in range(count):
-        category = categories[i % len(categories)]
-        cat_data = CATEGORIES[category]
-
-        # Select priority based on weights
-        priority = random.choices(
-            list(cat_data["priority_weights"].keys()),
-            weights=list(cat_data["priority_weights"].values())
-        )[0]
-
-        # Select random tags
-        tags = random.sample(cat_data["tags_pool"], k=random.randint(2, 4))
-
-        # Generate content from template
-        template = random.choice(cat_data["templates"])
-        content = fill_template(template, category)
-
-        doc_num = (i // len(categories)) + 1
-        document_id = f"doc-{category}-{doc_num:03d}"
-        chunk_id = f"{document_id}-chunk-0"
-
-        # Generate embedding with seed based on content for some consistency
-        embedding = generate_embedding(256, seed=hash(content) % 2**32)
-
-        documents.append({
-            "document_id": document_id,
-            "chunk_id": chunk_id,
-            "content": content,
-            "metadata": {
-                "source": "support-portal",
-                "category": category,
-                "priority": priority,
-                "tags": tags,
-                "chunkIndex": 0
-            },
-            "embedding": embedding
-        })
-
-    return documents
-
-def generate_queries():
-    """Generate query embeddings."""
-    queries = []
-    for q in QUERY_TEMPLATES:
-        queries.append({
-            "id": q["id"],
-            "description": q["description"],
-            "embedding": generate_embedding(256, seed=hash(q["description"]) % 2**32)
-        })
-    return queries
-
-def main():
-    print("Generating 500 sample documents...")
-    documents = generate_documents(500)
-    queries = generate_queries()
-
-    data = {
-        "documents": documents,
-        "queries": queries
-    }
-
-    output_file = "sample_vectors.json"
-    with open(output_file, "w") as f:
-        json.dump(data, f, indent=2)
-
-    print(f"Generated {len(documents)} documents and {len(queries)} queries")
-    print(f"Saved to {output_file}")
-
-    # Print category distribution
-    from collections import Counter
-    categories = Counter(d["metadata"]["category"] for d in documents)
-    print("\nCategory distribution:")
-    for cat, count in sorted(categories.items()):
-        print(f"  {cat}: {count}")
-
-if __name__ == "__main__":
-    main()
